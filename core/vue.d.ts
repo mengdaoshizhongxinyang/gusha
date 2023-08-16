@@ -32,31 +32,24 @@ declare module "vue" {
     true extends N ? [] : Push<TuplifyUnion<Exclude<T, L>>, L>
 
 
-  type EmitFunc = (key: string, ...args: any[]) => any
+  type EmitFunc = (...args: any[]) => any
   type EmitUnionToProps<T extends (any)[]> =
     T extends [infer L, ...infer R]
     ? R extends (EmitFunc)[]
-    ? L extends EmitFunc
-    ? Parameters<L> extends [infer K, ...infer A]
-    ? K extends string
-    ? { [key in K as `on${Capitalize<key>}`]?: (...args: A) => any } & EmitUnionToProps<R>
-    : {}
-    : {}
-    : {}
-    : {}
+      ? L extends EmitFunc
+        ? Parameters<L> extends [infer K, ...infer A]  
+          ? K extends string
+            ? { [key in K as `on${Capitalize<key>}`]?: (...args: A) => any } & EmitUnionToProps<R>
+            : {}
+          : {}
+        : {}
+      : {}
     : {}
 
   export function defineComponent<
     P extends Record<string, any>,
-    S extends Record<string, (...args: any[]) => VNode>,
-    A extends Record<string, unknown>,
-    E extends EmitFunc,
     R extends RenderFunction
-  >(setup: (props: P, ctx: {
-    attrs: A,
-    emit: E,
-    slots: S
-  }) => R): (
-    props: P & EmitUnionToProps<TuplifyUnion<OverloadUnion<E>>>
+  >(setup: (props: P) => R): (
+    props: P & EmitUnionToProps<TuplifyUnion<OverloadUnion<(ReturnType<R>)['$emit']>>>
   ) => ReturnType<R>
 }
