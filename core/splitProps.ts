@@ -1,10 +1,10 @@
-import { computed } from "vue";
-export function splitProps<T extends Record<string, any>,K extends keyof T>(props: T, keys: K[]) {
-  return computed(() => {
-    const result:Record<string,any>={}
-    for(let key in props){
-      result[key]=props[key]
-    }
-    return result as Pick<T,K>
-  })
+import { computed, type ComputedRef } from "vue";
+export function splitProps<T extends Record<string, any>>(props: T): {
+  [key in keyof T]: ComputedRef<T>
+} {
+  const res: any = {}
+  for (const key in props) {
+    res[key] = computed(() => props[key])
+  }
+  return res
 }
