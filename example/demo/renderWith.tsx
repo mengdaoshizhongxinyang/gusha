@@ -10,14 +10,14 @@ const Comp = defineComponent(
     function bar() {
       console.log(foo.value)
     }
-    const slots=defineSlot<{content:()=>string}>()
+    const slots = defineSlot<{ content: [] }>()
     return renderWith(
       () => <div>
         {props.a}
-        <button onClick={()=>emit('myClick')}>
+        <button onClick={() => emit('myClick')}>
           {slots.content?.()}
         </button>
-      </div>, { bar, foo, $emit: emit })
+      </div>, { bar, foo, $emit: emit, $slots: slots })
   })
 
 export default defineComponent(() => {
@@ -26,11 +26,19 @@ export default defineComponent(() => {
     console.log(temp.value?.foo.value)
     temp.value?.bar()
   }
+
   return () => <>
+    <Comp a={'233'} b={'foo'} ref={temp} onMyClick={handleClick} v-slots={{
+      content: () => <div></div>,
+      default: () => <div></div>
+    }} />
     <Comp a={'233'} b={'foo'} ref={temp} onMyClick={handleClick}>
-      {{
-        content:()=>"button"
-      }}
+      {
+        {
+          content: () => <div></div>,
+          default: () => <div></div>
+        }
+      }
     </Comp>
   </>
 })

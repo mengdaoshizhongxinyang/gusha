@@ -1,5 +1,5 @@
 import "vue"
-import { RenderFunction, type VNode } from "vue";
+import { RenderFunction, type VNode, VNodeChild } from "vue";
 declare module "vue" {
   type OverloadProps<TOverload> = Pick<TOverload, keyof TOverload>;
   type OverloadUnionRecursive<TOverload, TPartialOverload = unknown> = TOverload extends (
@@ -36,20 +36,29 @@ declare module "vue" {
   type EmitUnionToProps<T extends (any)[]> =
     T extends [infer L, ...infer R]
     ? R extends (EmitFunc)[]
-      ? L extends EmitFunc
-        ? Parameters<L> extends [infer K, ...infer A]  
-          ? K extends string
-            ? { [key in K as `on${Capitalize<key>}`]?: (...args: A) => any } & EmitUnionToProps<R>
-            : {}
-          : {}
-        : {}
-      : {}
+    ? L extends EmitFunc
+    ? Parameters<L> extends [infer K, ...infer A]
+    ? K extends string
+    ? { [key in K as `on${Capitalize<key>}`]?: (...args: A) => any } & EmitUnionToProps<R>
+    : {}
+    : {}
+    : {}
+    : {}
     : {}
 
   export function defineComponent<
     P extends Record<string, any>,
     R extends RenderFunction
   >(setup: (props: P) => R): (
-    props: P & EmitUnionToProps<TuplifyUnion<OverloadUnion<(ReturnType<R>)['$emit']>>>
+    props: P
+      & EmitUnionToProps<TuplifyUnion<OverloadUnion<(Record<string,any>&ReturnType<R>)['$emit']>>>
+      & { "v-slots"?: (Record<string,any>&ReturnType<R>)['$slots'] | (VNodeChild) }
   ) => ReturnType<R>
+
+}
+
+declare global {
+  namespace JSX {
+    interface ElementChildrenAttribute { "v-slots": {}; }
+  }
 }

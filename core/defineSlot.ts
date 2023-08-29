@@ -1,8 +1,10 @@
-import { type VNode, getCurrentInstance } from "vue";
-export function defineSlot<S extends Record<string, (...args: any[]) => any>>(){
+import { type VNode, getCurrentInstance, type VNodeChild } from "vue";
+export function defineSlot<S extends Record<string, any[]>>() {
   const proxy = getCurrentInstance()?.proxy
   if (proxy) {
-    return proxy.$slots as unknown as Partial<S>
+    return proxy.$slots as unknown as Partial<{
+      [key in keyof S]: (...args: S[key]) => VNodeChild
+    }>
   } else {
     throw Error()
   }
